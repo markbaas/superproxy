@@ -1,0 +1,10 @@
+{
+    "www.funda.nl": {
+        "statusCode": [200, 301, 302],
+        "body": ["2016 Funda Real Estate B\\.V\\."]
+    },
+    "default": {
+        "statusCode": [200, 301, 302],
+        "body": []
+    }
+}
