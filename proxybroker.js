@@ -48,7 +48,7 @@ export default class ProxyBroker {
         ProxyLists.getProxies(options)
             .on('data', this.checkProxies.bind(this))
             .on('error', (err) => {
-                // console.log(err)
+                // console.log('proxylists', err)
             })
             .once('done', () => setTimeout(this.fetchProxies.bind(this), 3600000))
     }
@@ -128,7 +128,7 @@ export default class ProxyBroker {
         if (proxy === undefined)
             return
 
-        this.makeRequest(this.judge, proxy).then(() => {}, (err) => {});
+        this.makeRequest(this.judge, proxy).then(() => {}, (err) => { });
     }
 
     checkBannedProxies() {
@@ -228,7 +228,7 @@ export default class ProxyBroker {
             this.makeRequest(targetUrl, proxy, query).then((resp, body) => {
                 resolve(resp)
             }, (err) => {
-                console.error(err)
+                console.error('bla', err)
                 retryPage()
             })
         })

@@ -11,8 +11,6 @@
   "dependencies": {
     "argv": "0.0.2",
     "express": "^4.14.0",
-    "http-proxy": "^1.16.2",
-    "hyperquest": "^2.1.2",
     "proxy-lists": "git://github.com/markbaas/proxy-lists.git"
   }
 }
