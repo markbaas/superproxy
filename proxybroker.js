@@ -1,4 +1,4 @@
-import ProxyLists from './proxy-lists'
+import ProxyLists from 'proxy-lists'
 import request from 'request'
 import url from 'url'
 import rules from './rules.json'
@@ -32,7 +32,7 @@ export default class ProxyBroker {
         this.fetchProxies()
 
         setInterval(() => {
-            console.log(`${this.fastPool.length}/${this.proxyPool.length}/${this.jailPool.length}/${this.foundProxies}`)
+            console.log(`${this.fastPool.length}/${this.proxyPool.length}/${this.jailPool.length}/${this.checkingQueue.length}`)
             for (let i = 0; i < (settings.maxConcurrentRequests - this.concurrentRequests); i++) {
                 this.checkProxyFromQueue()
             }
@@ -44,16 +44,32 @@ export default class ProxyBroker {
         }, 1000)
     }
 
+    dereferenceProxylists() {
+        console.log('done finding proxies')
+        const keys = Object.keys(require.cache).filter((e) => {
+            return e.match(/proxy-lists/) !== null
+        })
+        keys.forEach((key) => {
+            delete require.cache[key]
+        })
+    }
+
     fetchProxies() {
         ProxyLists.getProxies(options)
             .on('data', this.checkProxies.bind(this))
             .on('error', (err) => {
                 // console.log('proxylists', err)
             })
-            .once('done', () => setTimeout(this.fetchProxies.bind(this), 3600000))
+            .once('end', () => {
+                this.dereferenceProxylists()
+            })
     }
 
     checkProxies(proxies) {
+        // const total = this.checkingQueue.length + this.fastPool.length + this.proxyPool.length
+        // if (total > 100000) {
+        //     this.dereferenceProxylists()
+        // }
         this.foundProxies += proxies.length
         proxies.forEach((proxy) => {
             if (this.proxyPool.indexOf(proxy) == -1)

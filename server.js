@@ -1,21 +1,22 @@
+#!/usr/bin/env node
 
 import express from 'express'
 import request from 'request'
-import argv from 'argv'
+
+import program from 'commander'
 
 import ProxyBroker from './proxybroker'
 
+
 process.env.UV_THREADPOOL_SIZE = 1024;
 
+program
+  .version('0.0.1')
+  .option('-t, --target [target]', 'Target site [http://www.google.com]', 'http://www.google.com')
+  .parse(process.argv);
 
-var args = argv.option({
-    name: 'judge',
-    short: 'j',
-    type: 'string',
-    description: 'Which host should be targeted for checking valid proxies?',
-}).run()
-
-const proxybroker = new ProxyBroker(args.options.judge)
+console.log(`Starting proxybroker targeting ${program.target}`)
+const proxybroker = new ProxyBroker(program.target)
 const app = express()
 
 app.use('/', (req, res) => {

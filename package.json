@@ -4,7 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rm -rf build && babel --presets es2015,stage-2 -d build server.js proxybroker.js && cp *.json build/",
+    "preinstall": "npm run build"
+  },
+  "bin": {
+    "superproxy": "./build/server.js"
   },
   "author": "",
   "license": "ISC",
