@@ -2,14 +2,13 @@
   "name": "superproxy",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./build/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rm -rf build && babel --presets es2015,stage-2 -d build server.js proxybroker.js && cp *.json build/",
-    "preinstall": "npm run build"
+    "build": "rm -rf dist && babel --presets es2015,stage-2 -d dist/ src/ && cp src/*.json dist/"
   },
   "bin": {
-    "superproxy": "./build/server.js"
+    "superproxy": "./dist/server.js"
   },
   "author": "",
   "license": "ISC",
