@@ -72,8 +72,9 @@ export default class ProxyBroker {
         // }
         this.foundProxies += proxies.length
         proxies.forEach((proxy) => {
-            if (this.proxyPool.indexOf(proxy) == -1)
-                this.checkingQueue.push(this.getProxyUrl(proxy))
+            const proxyUrl = this.getProxyUrl(proxy)
+            if (this.proxyPool.indexOf(proxyUrl) == -1 && this.fastPool.indexOf(proxyUrl) == -1 && this.checkingQueue.indexOf(proxyUrl) == -1)
+                this.checkingQueue.push(proxyUrl)
 
         })
     }
@@ -82,7 +83,7 @@ export default class ProxyBroker {
         const domainRules = rules[url.parse(targetUrl).host] || rules['default']
         // check error
         if (err) {
-            return err.message
+            return 'request error'
         }
         if (resp === undefined) {
             return 'response is undefined'
@@ -118,10 +119,10 @@ export default class ProxyBroker {
                 proxy,
                 timeout: settings.timeout,
                 time: true,
-                agent: false,
-                pool: {
-                    maxSockets: Infinity
-                }
+                agent: false
+                // pool: {
+                //     maxSockets: Infinity
+                // }
             }, (err, resp, body) => {
                 this.concurrentRequests -= 1
                 const results = this.checkResponse(targetUrl, proxy, err, resp, body)
@@ -131,7 +132,7 @@ export default class ProxyBroker {
                     reject(results)
             }).on('error', (err) => {
                 this.concurrentRequests -= 1
-                reject(err)
+                reject('general error')
             })
         })
     }
@@ -168,8 +169,9 @@ export default class ProxyBroker {
                 if (inProxyPool)
                     this.proxyPool.splice(this.proxyPool.indexOf(proxy), 1)
             } else {
-                if (inFastPool)
+                if (inFastPool) {
                     this.fastPool.splice(this.fastPool.indexOf(proxy) , 1)
+                }
                 if (!inProxyPool)
                     this.proxyPool.push(proxy)
             }

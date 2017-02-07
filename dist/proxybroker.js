@@ -101,7 +101,8 @@ var ProxyBroker = function () {
             // }
             this.foundProxies += proxies.length;
             proxies.forEach(function (proxy) {
-                if (_this3.proxyPool.indexOf(proxy) == -1) _this3.checkingQueue.push(proxy);
+                var proxyUrl = _this3.getProxyUrl(proxy);
+                if (_this3.proxyPool.indexOf(proxyUrl) == -1 && _this3.fastPool.indexOf(proxyUrl) == -1 && _this3.checkingQueue.indexOf(proxyUrl) == -1) _this3.checkingQueue.push(proxyUrl);
             });
         }
     }, {
@@ -110,7 +111,7 @@ var ProxyBroker = function () {
             var domainRules = _rules2.default[_url2.default.parse(targetUrl).host] || _rules2.default['default'];
             // check error
             if (err) {
-                return err.message;
+                return 'request error';
             }
             if (resp === undefined) {
                 return 'response is undefined';
@@ -145,20 +146,20 @@ var ProxyBroker = function () {
                 (0, _request2.default)({
                     qs: query,
                     url: targetUrl,
-                    proxy: _this4.getProxyUrl(proxy),
+                    proxy: proxy,
                     timeout: settings.timeout,
                     time: true,
-                    agent: false,
-                    pool: {
-                        maxSockets: Infinity
-                    }
+                    agent: false
+                    // pool: {
+                    //     maxSockets: Infinity
+                    // }
                 }, function (err, resp, body) {
                     _this4.concurrentRequests -= 1;
                     var results = _this4.checkResponse(targetUrl, proxy, err, resp, body);
                     if (results === true) resolve(resp, body);else reject(results);
                 }).on('error', function (err) {
                     _this4.concurrentRequests -= 1;
-                    reject(err);
+                    reject('general error');
                 });
             });
         }
@@ -171,7 +172,9 @@ var ProxyBroker = function () {
             var proxy = this.checkingQueue.shift();
             if (proxy === undefined) return;
 
-            this.makeRequest(this.judge, proxy).then(function () {}, function (err) {});
+            this.makeRequest(this.judge, proxy).then(function () {}, function (err) {
+                console.log(err);
+            });
         }
     }, {
         key: 'checkBannedProxies',
@@ -198,7 +201,9 @@ var ProxyBroker = function () {
                     this.fastPool.push(proxy);
                     if (inProxyPool) this.proxyPool.splice(this.proxyPool.indexOf(proxy), 1);
                 } else {
-                    if (inFastPool) this.fastPool.splice(this.fastPool.indexOf(proxy), 1);
+                    if (inFastPool) {
+                        this.fastPool.splice(this.fastPool.indexOf(proxy), 1);
+                    }
                     if (!inProxyPool) this.proxyPool.push(proxy);
                 }
             } else {

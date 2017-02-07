@@ -1,7 +1,7 @@
 {
     "www.funda.nl": {
         "statusCode": [200, 301, 302],
-        "body": ["2016 Funda Real Estate B\\.V\\."]
+        "body": ["Funda Real Estate B\\.V\\."]
     },
     "www.detelefoongids.nl": {
         "statusCode": [200, 301, 302],
