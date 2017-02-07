@@ -172,9 +172,7 @@ var ProxyBroker = function () {
             var proxy = this.checkingQueue.shift();
             if (proxy === undefined) return;
 
-            this.makeRequest(this.judge, proxy).then(function () {}, function (err) {
-                console.log(err);
-            });
+            this.makeRequest(this.judge, proxy).then(function () {}, function (err) {});
         }
     }, {
         key: 'checkBannedProxies',
