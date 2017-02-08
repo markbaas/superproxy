@@ -69,17 +69,6 @@ var ProxyBroker = function () {
     }
 
     _createClass(ProxyBroker, [{
-        key: 'dereferenceProxylists',
-        value: function dereferenceProxylists() {
-            console.log('done finding proxies');
-            var keys = Object.keys(require.cache).filter(function (e) {
-                return e.match(/proxy-lists/) !== null;
-            });
-            keys.forEach(function (key) {
-                delete require.cache[key];
-            });
-        }
-    }, {
         key: 'fetchProxies',
         value: function fetchProxies() {
             var _this2 = this;
@@ -87,7 +76,10 @@ var ProxyBroker = function () {
             _proxyLists2.default.getProxies(options).on('data', this.checkProxies.bind(this)).on('error', function (err) {
                 // console.log('proxylists', err)
             }).once('end', function () {
-                _this2.dereferenceProxylists();
+                console.log('done returning in 3600s');
+                setTimeout(function () {
+                    _this2.fetchProxies();
+                }, 3600000);
             });
         }
     }, {
@@ -213,7 +205,7 @@ var ProxyBroker = function () {
         value: function getProxy() {
             var proxy = void 0;
             var i = void 0;
-            if (this.fastPool.length > 100) {
+            if (this.fastPool.length > 20) {
                 i = Math.floor(Math.random() * this.fastPool.length);
                 proxy = this.fastPool[i];
             } else {
@@ -255,6 +247,12 @@ var ProxyBroker = function () {
 
             tries = tries || 0;
             var proxy = this.getProxy();
+            if (!proxy) {
+                setTimeout(function () {
+                    console.log('no proxies found waiting 5s');
+                    _this6.getPage(targetUrl, query, tries);
+                }, 5000);
+            }
 
             console.log('Getting ' + targetUrl + ' (try ' + (tries + 1) + ')');
 

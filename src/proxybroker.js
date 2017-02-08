@@ -44,16 +44,6 @@ export default class ProxyBroker {
         }, 1000)
     }
 
-    dereferenceProxylists() {
-        console.log('done finding proxies')
-        const keys = Object.keys(require.cache).filter((e) => {
-            return e.match(/proxy-lists/) !== null
-        })
-        keys.forEach((key) => {
-            delete require.cache[key]
-        })
-    }
-
     fetchProxies() {
         ProxyLists.getProxies(options)
             .on('data', this.checkProxies.bind(this))
@@ -61,7 +51,10 @@ export default class ProxyBroker {
                 // console.log('proxylists', err)
             })
             .once('end', () => {
-                this.dereferenceProxylists()
+                console.log('done returning in 3600s')
+                setTimeout(() => {
+                    this.fetchProxies()
+                }, 3600000)
             })
     }
 
@@ -184,7 +177,7 @@ export default class ProxyBroker {
     getProxy() {
         let proxy
         let i
-        if (this.fastPool.length > 100) {
+        if (this.fastPool.length > 20) {
             i = Math.floor(Math.random() * this.fastPool.length)
             proxy = this.fastPool[i]
         } else {
@@ -224,6 +217,12 @@ export default class ProxyBroker {
 
         tries = tries || 0
         const proxy = this.getProxy();
+        if (!proxy) {
+            setTimeout(() => {
+                console.log('no proxies found waiting 5s')
+                this.getPage(targetUrl, query, tries)
+            }, 5000)
+        }
 
         console.log(`Getting ${targetUrl} (try ${tries + 1})`)
 

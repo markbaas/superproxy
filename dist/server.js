@@ -39,6 +39,11 @@ app.use('/', function (req, res) {
     });
 });
 
+process.on('uncaughtException', function (err) {
+    console.error(err.stack);
+    console.log("Node NOT Exiting...");
+});
+
 var server = app.listen(8889, function () {
     var host = server.address().address;
     var port = server.address().port;
