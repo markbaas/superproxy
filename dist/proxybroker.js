@@ -205,7 +205,9 @@ var ProxyBroker = function () {
         value: function getProxy() {
             var proxy = void 0;
             var i = void 0;
-            if (this.fastPool.length > 20) {
+            var fastPoolPerc = this.fastPool.length / (this.fastPool.length + this.proxyPool.length);
+            var pickFastpool = Math.round(Math.random() * 100 / (fastPoolPerc * 2 * 100)) === 1;
+            if (pickFastpool) {
                 i = Math.floor(Math.random() * this.fastPool.length);
                 proxy = this.fastPool[i];
             } else {

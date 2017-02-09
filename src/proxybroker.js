@@ -177,7 +177,9 @@ export default class ProxyBroker {
     getProxy() {
         let proxy
         let i
-        if (this.fastPool.length > 20) {
+        const fastPoolPerc = this.fastPool.length / (this.fastPool.length + this.proxyPool.length)
+        const pickFastpool = Math.floor(Math.random() * 100/(fastPoolPerc * 2 * 100)) === 0
+        if (pickFastpool) {
             i = Math.floor(Math.random() * this.fastPool.length)
             proxy = this.fastPool[i]
         } else {
