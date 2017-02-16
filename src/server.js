@@ -19,17 +19,38 @@ console.log(`Starting proxybroker targeting ${program.target}`)
 const proxybroker = new ProxyBroker(program.target)
 const app = express()
 
-app.use('/', (req, res) => {
+app.use('/', (req, res, next) => {
+  if (!req.url.match(/^\/api/)) {
     proxybroker.getPage(req.url).then((resp) => {
-        res.set(resp.headers)
-        res.status(resp.statusCode)
-        res.send(resp.body)
-        res.end()
+      res.set(resp.headers)
+      res.status(resp.statusCode)
+      res.send(resp.body)
+      res.end()
     }, () => {
+      res.status(408)
+      res.end()
+    })
+  }
+  next()
+});
+
+app.get('/api', (req, res) => {
+    const url = req.headers['x-target-url']
+    if (!url) {
         res.status(408)
         res.end()
-    })
-});
+    } else {
+        proxybroker.getPage(url).then((resp) => {
+            res.set(resp.headers)
+            res.status(resp.statusCode)
+            res.send(resp.body)
+            res.end()
+        }, () => {
+            res.status(408)
+            res.end()
+        })
+    }
+})
 
 process.on('uncaughtException', function (err) {
   console.error(err.stack);

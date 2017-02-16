@@ -27,16 +27,37 @@ console.log('Starting proxybroker targeting ' + _commander2.default.target);
 var proxybroker = new _proxybroker2.default(_commander2.default.target);
 var app = (0, _express2.default)();
 
-app.use('/', function (req, res) {
-    proxybroker.getPage(req.url).then(function (resp) {
-        res.set(resp.headers);
-        res.status(resp.statusCode);
-        res.send(resp.body);
-        res.end();
-    }, function () {
+app.use('/', function (req, res, next) {
+    if (!req.url.match(/^\/api/)) {
+        proxybroker.getPage(req.url).then(function (resp) {
+            res.set(resp.headers);
+            res.status(resp.statusCode);
+            res.send(resp.body);
+            res.end();
+        }, function () {
+            res.status(408);
+            res.end();
+        });
+    }
+    next();
+});
+
+app.get('/api', function (req, res) {
+    var url = req.headers['x-target-url'];
+    if (!url) {
         res.status(408);
         res.end();
-    });
+    } else {
+        proxybroker.getPage(url).then(function (resp) {
+            res.set(resp.headers);
+            res.status(resp.statusCode);
+            res.send(resp.body);
+            res.end();
+        }, function () {
+            res.status(408);
+            res.end();
+        });
+    }
 });
 
 process.on('uncaughtException', function (err) {
